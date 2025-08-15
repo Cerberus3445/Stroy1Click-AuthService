@@ -13,7 +13,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken,Integ
 
     void deleteByToken(String token);
 
-    Integer countByUserCredential_Id(Long userId);
+    Integer countByUser_Id(Long userId);
 
-    void deleteAllByUserCredential_Id(Long userId);
+    void deleteAllByUser_Id(Long userId);
 }

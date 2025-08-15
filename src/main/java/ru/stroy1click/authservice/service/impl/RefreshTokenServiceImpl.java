@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.authservice.exception.NotFoundException;
 import ru.stroy1click.authservice.exception.ValidationException;
 import ru.stroy1click.authservice.model.RefreshToken;
-import ru.stroy1click.authservice.model.UserCredential;
+import ru.stroy1click.authservice.model.User;
 import ru.stroy1click.authservice.repository.RefreshTokenRepository;
 import ru.stroy1click.authservice.service.RefreshTokenService;
 import ru.stroy1click.authservice.service.UserService;
@@ -33,15 +33,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(String email) {
         log.info("createRefreshToken {}", email);
-        UserCredential userCredential = this.userService.getByEmail(email).orElseThrow(
+        User user = this.userService.getByEmail(email).orElseThrow(
                 () -> new NotFoundException("User with this email not found")
         );
         RefreshToken refreshToken = RefreshToken.builder()
-                .userCredential(userCredential)
+                .user(user)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(600000))
                 .build();
-        if(this.refreshTokenRepository.countByUserCredential_Id(userCredential.getId()) <= 6){
+        if(this.refreshTokenRepository.countByUser_Id(user.getId()) <= 6){
             return this.refreshTokenRepository.save(refreshToken);
         } else {
             throw new ValidationException("The number of active sessions cannot exceed 6. Please log out on other devices.");
@@ -73,7 +73,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void deleteAll(Long userId) {
         log.info("deleteAll for user with {} id", userId);
-        this.refreshTokenRepository.deleteAllByUserCredential_Id(userId);
+        this.refreshTokenRepository.deleteAllByUser_Id(userId);
     }
 
 }

@@ -8,7 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
-import ru.stroy1click.authservice.model.UserCredential;
+import ru.stroy1click.authservice.model.User;
 import ru.stroy1click.authservice.service.JwtService;
 
 import java.security.Key;
@@ -26,11 +26,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(UserCredential userCredential) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role",userCredential.getRole());
-        claims.put("emailConfirmed",userCredential.getEmailConfirmed());
-        return createToken(claims, userCredential);
+        claims.put("role", user.getRole());
+        claims.put("emailConfirmed", user.getEmailConfirmed());
+        return createToken(claims, user);
     }
 
     @Override
@@ -39,10 +39,10 @@ public class JwtServiceImpl implements JwtService {
         return Collections.singleton(new SimpleGrantedAuthority(claims.get("role").toString()));
     }
 
-    private String createToken(Map<String, Object> claims, UserCredential userCredential) {
+    private String createToken(Map<String, Object> claims, User user) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userCredential.getEmail())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 300))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();

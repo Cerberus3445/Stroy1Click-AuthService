@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.authservice.dto.UserDto;
 import ru.stroy1click.authservice.mapper.UserMapper;
-import ru.stroy1click.authservice.model.UserCredential;
+import ru.stroy1click.authservice.model.User;
 import ru.stroy1click.authservice.repository.UserCredentialRepository;
 import ru.stroy1click.authservice.service.UserService;
 
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserCredential> getByEmail(String email) {
+    public Optional<User> getByEmail(String email) {
         log.info("getByEmail {}", email);
         return this.userCredentialRepository.findByEmail(email);
     }

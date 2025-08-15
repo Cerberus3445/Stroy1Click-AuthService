@@ -8,7 +8,7 @@ import ru.stroy1click.authservice.exception.NotFoundException;
 import ru.stroy1click.authservice.exception.ValidationException;
 import ru.stroy1click.authservice.model.AuthRequest;
 import ru.stroy1click.authservice.model.RefreshTokenRequest;
-import ru.stroy1click.authservice.model.UserCredential;
+import ru.stroy1click.authservice.model.User;
 import ru.stroy1click.authservice.service.AuthService;
 import ru.stroy1click.authservice.service.JwtService;
 import ru.stroy1click.authservice.service.RefreshTokenService;
@@ -36,8 +36,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String generateToken(String email) {
-        UserCredential userCredential = this.userService.getByEmail(email).get();
-        return this.jwtService.generateToken(userCredential);
+        User user = this.userService.getByEmail(email).get();
+        return this.jwtService.generateToken(user);
     }
 
     @Override
@@ -46,13 +46,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserCredential login(AuthRequest authRequest) {
-        UserCredential userCredential = this.userService.getByEmail(authRequest.getEmail()).orElseThrow(
+    public User login(AuthRequest authRequest) {
+        User user = this.userService.getByEmail(authRequest.getEmail()).orElseThrow(
                 () -> new NotFoundException("User with this email not found")
         );
 
-        if(this.passwordEncoder.matches(authRequest.getPassword(), userCredential.getPassword())){
-            return userCredential;
+        if(this.passwordEncoder.matches(authRequest.getPassword(), user.getPassword())){
+            return user;
         } else{
             throw new ValidationException("The password is incorrect");
         }

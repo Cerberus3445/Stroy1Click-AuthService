@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(schema = "users", name = "user")
 @NoArgsConstructor
-public class UserCredential {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

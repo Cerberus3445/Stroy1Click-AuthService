@@ -4,21 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.authservice.dto.UserDto;
-import ru.stroy1click.authservice.model.UserCredential;
+import ru.stroy1click.authservice.model.User;
 
 @Component
 @RequiredArgsConstructor
-public class UserMapper implements Mappable<UserCredential, UserDto>{
+public class UserMapper implements Mappable<User, UserDto>{
 
     private final ModelMapper modelMapper;
 
     @Override
-    public UserCredential toEntity(UserDto userDto) {
-        return this.modelMapper.map(userDto, UserCredential.class);
+    public User toEntity(UserDto userDto) {
+        return this.modelMapper.map(userDto, User.class);
     }
 
     @Override
-    public UserDto toDto(UserCredential userCredential) {
-        return this.modelMapper.map(userCredential, UserDto.class);
+    public UserDto toDto(User user) {
+        return this.modelMapper.map(user, UserDto.class);
     }
 }

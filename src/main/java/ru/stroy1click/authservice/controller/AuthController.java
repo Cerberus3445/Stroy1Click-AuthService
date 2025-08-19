@@ -44,7 +44,7 @@ public class AuthController {
 
         userDto.setEmailConfirmed(false); //by default
         this.authService.createUser(userDto);
-        return ResponseEntity.ok("The user has been created.");
+        return ResponseEntity.ok("Пользователь зарегистрирован.");
     }
 
     @PostMapping("/login")
@@ -58,32 +58,30 @@ public class AuthController {
                 .build();
     }
 
-    @DeleteMapping("/delete-all-refresh-tokens")
-    public ResponseEntity<String> deleteAll(@RequestParam("userId") Long userId){
+    @DeleteMapping("/logout-on-all-devices")
+    @Operation(summary = "Выйти на всех устройствах.")
+    public ResponseEntity<String> logoutOnAllDevices(@RequestParam("userId") Long userId){
         this.refreshTokenService.deleteAll(userId);
-        return ResponseEntity.ok("All tokens have been deleted.");
+        return ResponseEntity.ok("Успешный выход из всех устройств.");
     }
 
     @DeleteMapping("/logout")
-    @Operation(summary = "Logout with refreshToken")
-    public ResponseEntity<String> logout(@RequestBody RefreshTokenRequest refreshTokenRequest){
+    @Operation(summary = "Выйти из сеанса(удаление только 1 refresh token.)")
+    public ResponseEntity<String> logout(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest,
+                                         BindingResult bindingResult){
+        if(bindingResult.hasFieldErrors()) throw new ValidationException(collectErrorsToString(bindingResult.getFieldErrors()));
+
         this.authService.logout(refreshTokenRequest);
-        return ResponseEntity.ok("Logout successful");
+        return ResponseEntity.ok("Успешный выход.");
     }
 
-    @PostMapping("/refresh-token")
-    @Operation(summary = "Create and get a refreshToken")
-    public JwtResponse refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
-        return this.refreshTokenService.findByToken(refreshTokenRequest.getRefreshToken())
-                .map(this.refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(userCredential -> {
-                    String accessToken = this.jwtService.generateToken(userCredential);
-                    return JwtResponse.builder()
-                            .accessToken(accessToken)
-                            .refreshToken(refreshTokenRequest.getRefreshToken())
-                            .build();
-                }).orElseThrow(() -> new NotFoundException("Token not found"));
+    @PostMapping("/refresh")
+    @Operation(summary = "Обновить access token.")
+    public JwtResponse refreshToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest,
+                                    BindingResult bindingResult) {
+        if(bindingResult.hasFieldErrors()) throw new ValidationException(collectErrorsToString(bindingResult.getFieldErrors()));
+
+        return this.authService.refreshToken(refreshTokenRequest);
     }
 
     private String collectErrorsToString(List<FieldError> fieldErrors){

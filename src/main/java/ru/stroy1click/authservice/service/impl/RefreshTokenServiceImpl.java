@@ -27,24 +27,26 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final UserService userService;
 
     /**
-     * Creates a new refresh token for a user identified by their email. If the user
-     * has more than 6 active sessions, throws a validation exception.
+     * Создает новый refresh токен для пользователя, идентифицируемого по email. Если у пользователя
+     * более 6 активных сессий, выбрасывает исключение валидации.
      */
     @Override
     public RefreshToken createRefreshToken(String email) {
         log.info("createRefreshToken {}", email);
         User user = this.userService.getByEmail(email).orElseThrow(
-                () -> new NotFoundException("User with this email not found")
+                () -> new NotFoundException(email)
         );
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(600000))
                 .build();
+
         if(this.refreshTokenRepository.countByUser_Id(user.getId()) <= 6){
             return this.refreshTokenRepository.save(refreshToken);
         } else {
-            throw new ValidationException("The number of active sessions cannot exceed 6. Please log out on other devices.");
+            throw new ValidationException("Вы превысили лимит по максимальному количеству активных " +
+                    "сессий. Для успешного входа в систему выйдите из аккаунта на других устройствах");
         }
     }
 
@@ -59,7 +61,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             this.refreshTokenRepository.delete(token);
             throw new ValidationException(token.getToken() +
-                    "Refresh refreshToken was expired. Please make a new signin request");
+                    "Refresh token просрочен, обновите его");
         }
         return token;
     }

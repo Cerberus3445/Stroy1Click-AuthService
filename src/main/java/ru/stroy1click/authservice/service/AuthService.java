@@ -3,6 +3,7 @@ package ru.stroy1click.authservice.service;
 
 import ru.stroy1click.authservice.dto.UserDto;
 import ru.stroy1click.authservice.model.AuthRequest;
+import ru.stroy1click.authservice.model.JwtResponse;
 import ru.stroy1click.authservice.model.RefreshTokenRequest;
 import ru.stroy1click.authservice.model.User;
 
@@ -12,7 +13,9 @@ public interface AuthService {
 
     String generateToken(String email);
 
-    void logout(RefreshTokenRequest refreshToken);
+    void logout(RefreshTokenRequest refreshTokenRequest);
 
     User login(AuthRequest authRequest);
+
+    JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
 }

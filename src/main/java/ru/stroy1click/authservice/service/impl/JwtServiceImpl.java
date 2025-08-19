@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import ru.stroy1click.authservice.dto.UserDto;
 import ru.stroy1click.authservice.model.User;
 import ru.stroy1click.authservice.service.JwtService;
 
@@ -26,7 +27,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(User user) {
+    public String generateToken(UserDto user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole());
         claims.put("emailConfirmed", user.getEmailConfirmed());
@@ -39,7 +40,7 @@ public class JwtServiceImpl implements JwtService {
         return Collections.singleton(new SimpleGrantedAuthority(claims.get("role").toString()));
     }
 
-    private String createToken(Map<String, Object> claims, User user) {
+    private String createToken(Map<String, Object> claims, UserDto user) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getEmail())

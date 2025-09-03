@@ -9,7 +9,7 @@ import ru.stroy1click.auth.model.User;
 
 public interface AuthService {
 
-    String createUser(UserDto userDto);
+    void createUser(UserDto userDto);
 
     String generateToken(String email);
 

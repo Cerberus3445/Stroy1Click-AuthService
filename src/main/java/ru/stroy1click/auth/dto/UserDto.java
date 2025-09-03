@@ -16,31 +16,30 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto implements Serializable {
-
-    private final static Long SerialVersionUID= 1L;
+public class UserDto {
 
     private Long id;
 
-    @NotBlank(message = "Имя не может быть пустым")
-    @Length(min = 2, max = 30, message = "Минимальная длина имени составляет 2 символа, максимальная - 30 символов")
+    @NotBlank(message = "{validation.userdto.first_name.not_blank}")
+    @Length(min = 2, max = 30, message = "{validation.userdto.first_name.length}")
     private String firstName;
 
-    @NotBlank(message = "Фамилия не может быть пустой")
-    @Length(min = 2, max = 30, message = "Минимальная длина фамилии составляет 2 символа, максимальная - 30 символов")
+    @NotBlank(message = "{validation.userdto.last_name.not_blank}")
+    @Length(min = 2, max = 30, message = "{validation.userdto.last_name.length}")
     private String lastName;
 
-    @NotBlank(message = "Электронная почта не может быть пустой")
-    @Email
-    @Length(min = 5, max = 50, message = "Минимальная длина email составляет 5 символа, максимальная - 50 символов")
+    @NotBlank(message = "{validation.userdto.email.not_blank}")
+    @Email(message = "{validation.userdto.email.valid}")
+    @Length(min = 8, max = 50, message = "{validation.userdto.email.length}")
     private String email;
 
-    @NotBlank(message = "Пароль не может быть пустым")
+    @NotBlank(message = "{validation.userdto.password.not_blank}")
+    @Length(min = 8, max = 60, message = "{validation.userdto.password.length}")
     private String password;
 
-    @NotNull(message = "Статус подтверждения не может быть пустым")
+    @NotNull(message = "{validation.userdto.email_confirmed.not_null}")
     private Boolean emailConfirmed;
 
-    @NotNull(message = "Роль не может быть пустой")
+    @NotNull(message = "{validation.userdto.role.not_null}")
     private Role role;
 }

@@ -2,6 +2,7 @@ package ru.stroy1click.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.stroy1click.auth.dto.UserDto;
@@ -12,6 +13,8 @@ import ru.stroy1click.auth.service.AuthService;
 import ru.stroy1click.auth.service.JwtService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.service.UserService;
+
+import java.util.Locale;
 
 
 @Service
@@ -28,11 +31,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final ModelMapper modelMapper;
 
+    private final MessageSource messageSource;
+
     @Override
-    public String createUser(UserDto userDto) {
+    public void createUser(UserDto userDto) {
         userDto.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
         this.userService.create(userDto);
-        return "Пользователь создан";
     }
 
     @Override
@@ -59,7 +63,13 @@ public class AuthServiceImpl implements AuthService {
         if(this.passwordEncoder.matches(authRequest.getPassword(), user.getPassword())){
             return user;
         } else{
-            throw new ValidationException("Пароль неверен");
+            throw new ValidationException(
+                    this.messageSource.getMessage(
+                            "error.password.incorrect",
+                            null,
+                            Locale.getDefault()
+                    )
+            );
         }
     }
 
@@ -67,6 +77,8 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         RefreshToken refreshToken = this.refreshTokenService.findByToken(refreshTokenRequest.getRefreshToken())
                 .orElseThrow(() -> new NotFoundException(refreshTokenRequest));
+        this.refreshTokenService.verifyExpiration(refreshToken);
+
         UserDto userDto = this.modelMapper.map(refreshToken.getUser(), UserDto.class);
 
         return JwtResponse.builder()

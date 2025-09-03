@@ -26,18 +26,18 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${web.service.uri}")
+    @Value("${url.service.web}")
     private String uri;
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Bean //TODO позже убрать "/api/v1/auth/logout-on-all-devices", "/api/v1/auth/logout"
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/register",
                                 "/api/v1/auth/login", "/api/v1/auth/validate", "/api/v1/auth/refresh",
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**",
-                                "/actuator/health", "/api/v1/auth/logout-on-all-devices", "/api/v1/auth/logout")
+                                "/actuator/health")
                         .permitAll()
                         .anyRequest().authenticated())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

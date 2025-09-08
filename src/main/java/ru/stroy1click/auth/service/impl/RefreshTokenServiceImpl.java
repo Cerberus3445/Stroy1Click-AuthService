@@ -2,18 +2,23 @@ package ru.stroy1click.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.exception.NotFoundException;
 import ru.stroy1click.auth.exception.ValidationException;
+import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.model.RefreshToken;
+import ru.stroy1click.auth.model.RefreshTokenRequest;
 import ru.stroy1click.auth.model.User;
 import ru.stroy1click.auth.repository.RefreshTokenRepository;
+import ru.stroy1click.auth.service.JwtService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.service.UserService;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,6 +36,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final MessageSource messageSource;
 
+    private final ModelMapper modelMapper;
+
+    private final JwtService jwtService;
+
     /**
      * Создает новый refresh токен для пользователя, идентифицируемого по email. Если у пользователя
      * более 6 активных сессий, выбрасывает исключение валидации.
@@ -38,9 +47,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(String email) {
         log.info("createRefreshToken {}", email);
-        User user = this.userService.getByEmail(email).orElseThrow(
-                () -> new NotFoundException(email)
-        );
+        User user = this.userService.getByEmail(email)
+                .orElseThrow(
+                        () -> new NotFoundException(email)
+                );
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
@@ -68,21 +78,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            throw new ValidationException(
-                    this.messageSource.getMessage(
-                            "error.refresh.token.expired",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
-        }
-        return token;
-    }
-
-    @Override
     public void delete(String token) {
         log.info("delete {}", token);
         this.refreshTokenRepository.deleteByToken(token);
@@ -92,6 +87,46 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void deleteAll(Long userId) {
         log.info("deleteAll for user with {} id", userId);
         this.refreshTokenRepository.deleteAllByUser_Id(userId);
+    }
+
+    @Override
+    public void extendTheExpirationDate(RefreshTokenRequest request) {
+        RefreshToken refreshToken = this.refreshTokenRepository.findFirstByToken(request.getRefreshToken())
+                        .orElseThrow(
+                                () -> new NotFoundException(request)
+                        );
+        refreshToken.setExpiryDate(refreshToken.getExpiryDate()
+                .plus(Duration.ofDays(7)));
+        this.refreshTokenRepository.save(refreshToken);
+    }
+
+    @Override
+    public JwtResponse refreshAccessToken(RefreshTokenRequest request) {
+        RefreshToken refreshToken = this.refreshTokenRepository.findFirstByToken(request.getRefreshToken())
+                .orElseThrow(
+                        () -> new NotFoundException(request)
+                );
+
+        verifyExpiration(refreshToken);
+
+        UserDto userDto = this.modelMapper.map(refreshToken.getUser(), UserDto.class);
+
+        return JwtResponse.builder()
+                .accessToken(this.jwtService.generateToken(userDto))
+                .refreshToken(refreshToken.getToken())
+                .build();
+    }
+
+    private void verifyExpiration(RefreshToken token) {
+        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+            throw new ValidationException(
+                    this.messageSource.getMessage(
+                            "error.refresh.token.expired",
+                            null,
+                            Locale.getDefault()
+                    )
+            );
+        }
     }
 
 }

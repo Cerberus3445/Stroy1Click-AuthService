@@ -72,18 +72,4 @@ public class AuthServiceImpl implements AuthService {
             );
         }
     }
-
-    @Override
-    public JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        RefreshToken refreshToken = this.refreshTokenService.findByToken(refreshTokenRequest.getRefreshToken())
-                .orElseThrow(() -> new NotFoundException(refreshTokenRequest));
-        this.refreshTokenService.verifyExpiration(refreshToken);
-
-        UserDto userDto = this.modelMapper.map(refreshToken.getUser(), UserDto.class);
-
-        return JwtResponse.builder()
-                .accessToken(this.jwtService.generateToken(userDto))
-                .refreshToken(refreshToken.getToken())
-                .build();
-    }
 }

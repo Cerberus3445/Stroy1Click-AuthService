@@ -22,7 +22,7 @@ import java.util.Locale;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Auth Controller", description = "Registration, login ang getting refresh refreshToken")
+@Tag(name = "Auth Controller", description = "Регистрация, логин и получение refresh token")
 @RateLimiter(name = "authLimiter")
 public class AuthController {
 
@@ -34,7 +34,7 @@ public class AuthController {
 
     private final MessageSource messageSource;
 
-    @PostMapping("/register")
+    @PostMapping("/registration")
     @Operation(summary = "Create user")
     public ResponseEntity<String> registration(@RequestBody @Valid UserDto userDto, BindingResult bindingResult) {
         this.createValidator.validate(userDto);
@@ -97,16 +97,5 @@ public class AuthController {
                         Locale.getDefault()
                 )
         );
-    }
-
-    @PostMapping("/refresh")
-    @Operation(summary = "Обновить access token.")
-    public JwtResponse refreshToken(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest,
-                                    BindingResult bindingResult) {
-        if(bindingResult.hasFieldErrors()) throw new ValidationException(
-                ValidationErrorUtils.collectErrorsToString(bindingResult.getFieldErrors())
-        );
-
-        return this.authService.refreshToken(refreshTokenRequest);
     }
 }

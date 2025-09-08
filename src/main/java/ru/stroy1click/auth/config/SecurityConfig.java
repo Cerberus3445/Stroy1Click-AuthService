@@ -59,7 +59,7 @@ public class SecurityConfig {
         };
     }
 
-    @Bean
+    @Bean //TODO
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList(uri));

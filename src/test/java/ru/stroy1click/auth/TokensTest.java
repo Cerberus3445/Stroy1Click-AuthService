@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.model.RefreshTokenRequest;
 
@@ -52,4 +50,71 @@ public class TokensTest {
         Assertions.assertEquals("Refresh Token продлён", responseEntity.getBody());
     }
 
+    @Test
+    public void refreshAccessTokenWithBlankToken() {
+        HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(""));
+
+        ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
+                "/api/v1/tokens/access",
+                HttpMethod.POST,
+                httpEntity,
+                ProblemDetail.class
+        );
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        Assertions.assertNotNull(responseEntity.getBody());
+        Assertions.assertEquals("Ошибка валидации", responseEntity.getBody().getTitle());
+        Assertions.assertTrue(responseEntity.getBody().getDetail().contains("Refresh token не может быть пустым"));
+    }
+
+    @Test
+    public void refreshTokenWithBlankToken() {
+        HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(""));
+
+        ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
+                "/api/v1/tokens/refresh-token",
+                HttpMethod.PATCH,
+                httpEntity,
+                ProblemDetail.class
+        );
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        Assertions.assertNotNull(responseEntity.getBody());
+        Assertions.assertEquals("Ошибка валидации", responseEntity.getBody().getTitle());
+        Assertions.assertTrue(responseEntity.getBody().getDetail().contains("Refresh token не может быть пустым"));
+    }
+
+    @Test
+    public void refreshAccessTokenWithInvalidLengthToken() {
+        HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest("invalid-token"));
+
+        ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
+                "/api/v1/tokens/access",
+                HttpMethod.POST,
+                httpEntity,
+                ProblemDetail.class
+        );
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        Assertions.assertNotNull(responseEntity.getBody());
+        Assertions.assertEquals("Ошибка валидации", responseEntity.getBody().getTitle());
+        Assertions.assertTrue(responseEntity.getBody().getDetail().contains("Длина токена должна составлять 36 символов"));
+    }
+
+    @Test
+    public void refreshTokenWithInvalidLengthToken() {
+        HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest("invalid-token"));
+
+        ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
+                "/api/v1/tokens/refresh-token",
+                HttpMethod.PATCH,
+                httpEntity,
+                ProblemDetail.class
+        );
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        Assertions.assertNotNull(responseEntity.getBody());
+        Assertions.assertEquals("Ошибка валидации", responseEntity.getBody().getTitle());
+        Assertions.assertTrue(responseEntity.getBody().getDetail().contains("Длина токена должна составлять 36 символов"));
+    }
 }

@@ -14,7 +14,7 @@ import ru.stroy1click.auth.model.Role;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthTests {
+class AuthIntegrationTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;

@@ -12,7 +12,7 @@ import ru.stroy1click.auth.model.RefreshTokenRequest;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TokensTest {
+public class TokenIntegrationTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;

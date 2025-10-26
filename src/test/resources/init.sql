@@ -33,10 +33,10 @@ create table if not exists auth.refresh_tokens(
 -- Описание: регистрация пользователя
 insert into auth.users(first_name, last_name, email, password, role, email_confirmed) values ('Mike', 'Thompson', 'mike_thompson@gmail.com', '{bcrypt}$2a$12$krql2OIk1z2Dpl7Inn7Bo.ryVJqUXN5W1uEeztbgkHJnKPu7IFkFy', 'ROLE_USER',false);
 
--- Test: TokenIntegrationTests refreshToken()
+-- Test: TokenTests refreshToken()
 -- Описание: обновление срока годности токена
 insert into auth.refresh_tokens(user_id, token, expiry_date) values (1, '40f2a44f-31ed-4593-97fe-ab775e309988','2000-09-10 09:01:43.728681');
 
--- Test: TokenIntegrationTests refreshAccessToken()
+-- Test: TokenTests refreshAccessToken()
 -- Описание: токен для обновления access token
 insert into auth.refresh_tokens(user_id, token, expiry_date) values (1, 'ba9a4691-ff6d-45eb-857f-1e39079ebd60','2077-09-10 09:01:43.728681');

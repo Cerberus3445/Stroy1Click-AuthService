@@ -1,4 +1,4 @@
-package ru.stroy1click.auth;
+package ru.stroy1click.auth.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AuthUnitTests {
+class AuthTests {
 
     @Mock
     private UserService userService;

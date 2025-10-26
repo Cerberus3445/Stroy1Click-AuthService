@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.mapper.UserMapper;
-import ru.stroy1click.auth.model.User;
+import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.repository.UserCredentialRepository;
 import ru.stroy1click.auth.service.UserService;
 

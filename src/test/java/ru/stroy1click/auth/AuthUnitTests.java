@@ -13,7 +13,7 @@ import ru.stroy1click.auth.exception.NotFoundException;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.AuthRequest;
 import ru.stroy1click.auth.model.RefreshTokenRequest;
-import ru.stroy1click.auth.model.User;
+import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.service.JwtService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.service.UserService;

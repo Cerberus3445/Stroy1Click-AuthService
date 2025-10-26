@@ -10,12 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.stroy1click.auth.dto.UserDto;
+import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.*;
 import ru.stroy1click.auth.service.AuthService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.util.ValidationErrorUtils;
-import ru.stroy1click.auth.validator.CreateValidator;
+import ru.stroy1click.auth.validator.base.CreateValidator;
+import ru.stroy1click.auth.validator.user.UserCreateValidator;
 
 import java.util.Locale;
 
@@ -30,7 +32,7 @@ public class AuthController {
 
     private final RefreshTokenService refreshTokenService;
 
-    private final CreateValidator createValidator;
+    private final UserCreateValidator createValidator;
 
     private final MessageSource messageSource;
 

@@ -1,4 +1,4 @@
-package ru.stroy1click.auth.model;
+package ru.stroy1click.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

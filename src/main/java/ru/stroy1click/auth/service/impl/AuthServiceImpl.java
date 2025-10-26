@@ -6,6 +6,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.stroy1click.auth.dto.UserDto;
+import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.exception.NotFoundException;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.*;

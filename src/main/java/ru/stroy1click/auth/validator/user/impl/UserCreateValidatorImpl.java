@@ -1,16 +1,15 @@
-package ru.stroy1click.auth.validator.impl;
-
+package ru.stroy1click.auth.validator.user.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.exception.AlreadyExistsException;
 import ru.stroy1click.auth.service.UserService;
-import ru.stroy1click.auth.validator.CreateValidator;
+import ru.stroy1click.auth.validator.user.UserCreateValidator;
 
 @Component
 @RequiredArgsConstructor
-public class CreateValidatorImpl implements CreateValidator {
+public class UserCreateValidatorImpl implements UserCreateValidator {
 
     private final UserService userService;
 

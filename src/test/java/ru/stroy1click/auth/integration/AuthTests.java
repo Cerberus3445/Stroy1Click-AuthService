@@ -1,4 +1,4 @@
-package ru.stroy1click.auth;
+package ru.stroy1click.auth.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import ru.stroy1click.auth.model.Role;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthIntegrationTests {
+class AuthTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;

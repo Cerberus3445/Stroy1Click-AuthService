@@ -1,4 +1,4 @@
-package ru.stroy1click.auth;
+package ru.stroy1click.auth.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import ru.stroy1click.auth.model.RefreshTokenRequest;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TokenIntegrationTests {
+public class TokenTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;

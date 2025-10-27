@@ -20,7 +20,7 @@ class AuthTests {
     private TestRestTemplate testRestTemplate;
 
     @Test
-    public void registration(){
+    public void registration_ShouldRegisterUser_WhenValidData(){
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -44,7 +44,7 @@ class AuthTests {
     }
 
     @Test
-    public void login(){
+    public void login_ShouldReturnTokens_WhenValidCredentials(){
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("mike_thompson@gmail.com", "password123"));
 
         ResponseEntity<JwtResponse> responseEntity = this.testRestTemplate.exchange(
@@ -62,7 +62,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithBlankFirstName() {
+    public void registration_ShouldReturnValidationError_WhenFirstNameIsBlank() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("")
                 .lastName("Thompson")
@@ -86,7 +86,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithShortFirstName() {
+    public void registration_ShouldReturnValidationError_WhenFirstNameIsTooShort() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("K")
                 .lastName("Thompson")
@@ -110,7 +110,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithLongFirstName() {
+    public void registration_ShouldReturnValidationError_WhenFirstNameIsTooLong() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("K".repeat(31))
                 .lastName("Thompson")
@@ -134,7 +134,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithBlankLastName() {
+    public void registration_ShouldReturnValidationError_WhenLastNameIsBlank() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("")
@@ -158,7 +158,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithShortLastName() {
+    public void registration_ShouldReturnValidationError_WhenLastNameIsTooShort() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("T")
@@ -182,7 +182,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithLongLastName() {
+    public void registration_ShouldReturnValidationError_WhenLastNameIsTooLong() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("T".repeat(31))
@@ -206,7 +206,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithBlankEmail() {
+    public void registration_ShouldReturnValidationError_WhenEmailIsBlank() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -230,7 +230,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithInvalidEmail() {
+    public void registration_ShouldReturnValidationError_WhenEmailIsInvalid() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -254,7 +254,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithShortEmail() {
+    public void registration_ShouldReturnValidationError_WhenEmailIsTooShort() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -278,7 +278,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithLongEmail() {
+    public void registration_ShouldReturnValidationError_WhenEmailIsTooLong() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -302,7 +302,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithBlankPassword() {
+    public void registration_ShouldReturnValidationError_WhenPasswordIsBlank() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -326,7 +326,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithShortPassword() {
+    public void registration_ShouldReturnValidationError_WhenPasswordIsTooShort() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate2")
                 .lastName("Thompson2")
@@ -350,7 +350,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithLongPassword() {
+    public void registration_ShouldReturnValidationError_WhenPasswordIsTooLong() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -374,7 +374,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithNullEmailConfirmed() {
+    public void registration_ShouldReturnValidationError_WhenEmailConfirmedIsNull() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate")
                 .lastName("Thompson")
@@ -397,7 +397,7 @@ class AuthTests {
     }
 
     @Test
-    public void registrationWithNullRole() {
+    public void registration_ShouldReturnValidationError_WhenRoleIsNull() {
         HttpEntity<UserDto> httpEntity = new HttpEntity<>(UserDto.builder()
                 .firstName("Kate1")
                 .lastName("Thompson1")
@@ -420,7 +420,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithBlankEmail() {
+    public void login_ShouldReturnValidationError_WhenEmailIsBlank() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("", "password123"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -437,7 +437,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithInvalidEmail() {
+    public void login_ShouldReturnValidationError_WhenEmailIsInvalid() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("invalid-email", "password123"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -454,7 +454,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithShortEmail() {
+    public void login_ShouldReturnValidationError_WhenEmailIsTooShort() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("a@b.co", "password123"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -471,7 +471,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithLongEmail() {
+    public void login_ShouldReturnValidationError_WhenEmailIsTooLong() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("a".repeat(45) + "@gmail.com", "password123"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -488,7 +488,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithBlankPassword() {
+    public void login_ShouldReturnValidationError_WhenPasswordIsBlank() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("mike_thompson@gmail.com", ""));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -505,7 +505,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithShortPassword() {
+    public void login_ShouldReturnValidationError_WhenPasswordIsTooShort() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("mike_thompson@gmail.com", "pass123"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -522,7 +522,7 @@ class AuthTests {
     }
 
     @Test
-    public void loginWithLongPassword() {
+    public void login_ShouldReturnValidationError_WhenPasswordIsTooLong() {
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("mike_thompson@gmail.com", "p".repeat(61)));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(

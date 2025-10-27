@@ -18,7 +18,7 @@ public class TokenTests {
     private TestRestTemplate testRestTemplate;
 
     @Test
-    public void refreshAccessToken() {
+    public void refreshAccessToken_ShouldReturnNewTokens_WhenValidRefreshToken() {
         String refreshToken = "ba9a4691-ff6d-45eb-857f-1e39079ebd60";
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(refreshToken));
 
@@ -35,7 +35,7 @@ public class TokenTests {
     }
 
     @Test
-    public void refreshToken(){
+    public void refreshToken_ShouldExtendTokenExpiration_WhenValidRefreshToken(){
         String refreshToken = "40f2a44f-31ed-4593-97fe-ab775e309988";
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(refreshToken));
 
@@ -51,7 +51,7 @@ public class TokenTests {
     }
 
     @Test
-    public void refreshAccessTokenWithBlankToken() {
+    public void refreshAccessToken_ShouldReturnValidationError_WhenTokenIsBlank() {
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(""));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -68,7 +68,7 @@ public class TokenTests {
     }
 
     @Test
-    public void refreshTokenWithBlankToken() {
+    public void refreshToken_ShouldReturnValidationError_WhenTokenIsBlank() {
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(""));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -85,7 +85,7 @@ public class TokenTests {
     }
 
     @Test
-    public void refreshAccessTokenWithInvalidLengthToken() {
+    public void refreshAccessToken_ShouldReturnValidationError_WhenTokenLengthIsInvalid() {
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest("invalid-token"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(
@@ -102,7 +102,7 @@ public class TokenTests {
     }
 
     @Test
-    public void refreshTokenWithInvalidLengthToken() {
+    public void refreshToken_ShouldReturnValidationError_WhenTokenLengthIsInvalid() {
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest("invalid-token"));
 
         ResponseEntity<ProblemDetail> responseEntity = this.testRestTemplate.exchange(

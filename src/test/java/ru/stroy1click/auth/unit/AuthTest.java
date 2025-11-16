@@ -25,7 +25,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AuthTests {
+class AuthTest {
 
     @Mock
     private UserService userService;
@@ -48,17 +48,36 @@ class AuthTests {
     @InjectMocks
     private AuthServiceImpl authService;
 
+    private User user;
+    private UserDto userDto;
+    private AuthRequest authRequest;
+    private RefreshTokenRequest refreshTokenRequest;
+    private static final String TEST_EMAIL = "test@example.com";
+    private static final String TEST_PASSWORD = "password";
+    private static final String ENCODED_PASSWORD = "encodedPassword";
+    private static final String GENERATED_TOKEN = "generatedToken";
+    private static final String REFRESH_TOKEN = "refreshToken";
+
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        this.user = new User();
+        this.user.setPassword(ENCODED_PASSWORD);
+
+        this.userDto = new UserDto();
+        this.userDto.setPassword("plainPassword");
+
+        this.authRequest = new AuthRequest();
+        this.authRequest.setEmail(TEST_EMAIL);
+        this.authRequest.setPassword(TEST_PASSWORD);
+
+        this.refreshTokenRequest = new RefreshTokenRequest();
+        this.refreshTokenRequest.setRefreshToken(REFRESH_TOKEN);
     }
 
     @Test
-    public void createUser_ShouldEncodePasswordAndCreateUser() {
-        // Given
-        UserDto userDto = new UserDto();
-        userDto.setPassword("plainPassword");
-
+    public void createUser_ShouldEncodePasswordAndCreateUser_WhenCalled() {
         // When
         this.authService.createUser(userDto);
 
@@ -68,28 +87,24 @@ class AuthTests {
     }
 
     @Test
-    public void generateToken_WhenUserExists_ShouldGenerateToken() {
+    public void generateToken_ShouldGenerateToken_WhenUserExists() {
         // Given
-        String email = "test@example.com";
-        User user = new User();
-        UserDto userDto = new UserDto();
-
-        when(this.userService.getByEmail(email)).thenReturn(Optional.of(user));
+        when(this.userService.getByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
         when(this.modelMapper.map(user, UserDto.class)).thenReturn(userDto);
-        when(this.jwtService.generateToken(userDto)).thenReturn("generatedToken");
+        when(this.jwtService.generateToken(userDto)).thenReturn(GENERATED_TOKEN);
 
         // When
-        String token = this.authService.generateToken(email);
+        String token = this.authService.generateToken(TEST_EMAIL);
 
         // Then
-        assertEquals("generatedToken", token);
-        verify(this.userService).getByEmail(email);
+        assertEquals(GENERATED_TOKEN, token);
+        verify(this.userService).getByEmail(TEST_EMAIL);
         verify(this.modelMapper).map(user, UserDto.class);
         verify(this.jwtService).generateToken(userDto);
     }
 
     @Test
-    public void generateToken_WhenUserNotExists_ShouldThrowNotFoundException() {
+    public void generateToken_ShouldThrowNotFoundException_WhenUserNotExists() {
         // Given
         String email = "nonexistent@example.com";
         when(this.userService.getByEmail(email)).thenReturn(Optional.empty());
@@ -99,30 +114,19 @@ class AuthTests {
     }
 
     @Test
-    public void logout_ShouldDeleteRefreshToken() {
-        // Given
-        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
-        refreshTokenRequest.setRefreshToken("refreshToken");
-
+    public void logout_ShouldDeleteRefreshToken_WhenCalled() {
         // When
         this.authService.logout(refreshTokenRequest);
 
         // Then
-        verify(this.refreshTokenService).delete("refreshToken");
+        verify(this.refreshTokenService).delete(REFRESH_TOKEN);
     }
 
     @Test
-    public void login_WhenUserExistsAndPasswordMatches_ShouldReturnUser() {
+    public void login_ShouldReturnUser_WhenUserExistsAndPasswordMatches() {
         // Given
-        AuthRequest authRequest = new AuthRequest();
-        authRequest.setEmail("test@example.com");
-        authRequest.setPassword("password");
-
-        User user = new User();
-        user.setPassword("encodedPassword");
-
-        when(this.userService.getByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(this.passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
+        when(this.userService.getByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(this.passwordEncoder.matches(TEST_PASSWORD, ENCODED_PASSWORD)).thenReturn(true);
 
         // When
         User result = this.authService.login(authRequest);
@@ -132,30 +136,23 @@ class AuthTests {
     }
 
     @Test
-    public void login_WhenUserNotExists_ShouldThrowNotFoundException() {
+    public void login_ShouldThrowNotFoundException_WhenUserNotExists() {
         // Given
-        AuthRequest authRequest = new AuthRequest();
-        authRequest.setEmail("nonexistent@example.com");
-        authRequest.setPassword("password");
-
-        when(this.userService.getByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+        String nonExistentEmail = "nonexistent@example.com";
+        authRequest.setEmail(nonExistentEmail);
+        when(this.userService.getByEmail(nonExistentEmail)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(NotFoundException.class, () -> this.authService.login(authRequest));
     }
 
     @Test
-    public void login_WhenPasswordDoesNotMatch_ShouldThrowValidationException() {
+    public void login_ShouldThrowValidationException_WhenPasswordDoesNotMatch() {
         // Given
-        AuthRequest authRequest = new AuthRequest();
-        authRequest.setEmail("test@example.com");
-        authRequest.setPassword("wrongPassword");
-
-        User user = new User();
-        user.setPassword("encodedPassword");
-
-        when(this.userService.getByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(this.passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+        String wrongPassword = "wrongPassword";
+        authRequest.setPassword(wrongPassword);
+        when(this.userService.getByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(this.passwordEncoder.matches(wrongPassword, ENCODED_PASSWORD)).thenReturn(false);
         when(this.messageSource.getMessage("error.password.incorrect", null, Locale.getDefault()))
                 .thenReturn("Password is incorrect");
 

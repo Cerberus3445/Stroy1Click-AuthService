@@ -1,10 +1,9 @@
 spring:
   application:
     name: Auth-Service
-  profiles:
-    active: dev
   config:
-    import: application-prod.yml
+    activate:
+      on-profile: prod
   jpa:
     hibernate:
       ddl-auto: validate

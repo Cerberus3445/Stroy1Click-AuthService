@@ -98,6 +98,13 @@ public class AdviceController {
                         Locale.getDefault()
                 )
         );
+        problemDetail.setDetail(
+                this.messageSource.getMessage(
+                        "error.detail.already_exist",
+                        null,
+                        Locale.getDefault()
+                )
+        );
         return problemDetail;
     }
 }

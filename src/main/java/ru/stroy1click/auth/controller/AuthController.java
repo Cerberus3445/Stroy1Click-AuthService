@@ -16,8 +16,7 @@ import ru.stroy1click.auth.model.*;
 import ru.stroy1click.auth.service.AuthService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.util.ValidationErrorUtils;
-import ru.stroy1click.auth.validator.base.CreateValidator;
-import ru.stroy1click.auth.validator.user.UserCreateValidator;
+import ru.stroy1click.auth.validator.UserCreateValidator;
 
 import java.util.Locale;
 
@@ -37,7 +36,7 @@ public class AuthController {
     private final MessageSource messageSource;
 
     @PostMapping("/registration")
-    @Operation(summary = "Create user")
+    @Operation(summary = "Зарегистрировать пользователя")
     public ResponseEntity<String> registration(@RequestBody @Valid UserDto userDto, BindingResult bindingResult) {
         this.createValidator.validate(userDto);
         if(bindingResult.hasFieldErrors()) throw new ValidationException(

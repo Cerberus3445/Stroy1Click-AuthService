@@ -8,9 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.stroy1click.auth.exception.AlreadyExistsException;
-import ru.stroy1click.auth.exception.NotFoundException;
-import ru.stroy1click.auth.exception.ValidationException;
+import ru.stroy1click.auth.exception.*;
 
 import java.util.Locale;
 
@@ -52,6 +50,42 @@ public class AdviceController {
         return problemDetail;
     }
 
+    @ExceptionHandler(ServiceErrorResponseException.class)
+    public ProblemDetail handleException(ServiceErrorResponseException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                this.messageSource.getMessage(
+                        "error.title.internal_exception=",
+                        null,
+                        Locale.getDefault()
+                )
+        );
+        problemDetail.setTitle(this.messageSource.getMessage(
+                "error.details.internal_exception=",
+                null,
+                Locale.getDefault()
+        ));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ProblemDetail handleException(ServiceUnavailableException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                this.messageSource.getMessage(
+                        "error.details.service_unavailable",
+                        null,
+                        Locale.getDefault()
+                )
+        );
+        problemDetail.setTitle(this.messageSource.getMessage(
+                "error.title.service_unavailable",
+                null,
+                Locale.getDefault()
+        ));
+        return problemDetail;
+    }
+
     @ExceptionHandler(RequestNotPermitted.class)
     public ProblemDetail handleException(RequestNotPermitted exception){
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -75,7 +109,7 @@ public class AdviceController {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.SERVICE_UNAVAILABLE,
                 this.messageSource.getMessage(
-                        "error.description.service_unavailable",
+                        "error.details.service_unavailable",
                         null,
                         Locale.getDefault()
                 )
@@ -90,7 +124,7 @@ public class AdviceController {
 
     @ExceptionHandler(AlreadyExistsException.class)
     public ProblemDetail problemDetail(AlreadyExistsException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
         problemDetail.setTitle(
                 this.messageSource.getMessage(
                         "error.title.already_exist",
@@ -100,7 +134,7 @@ public class AdviceController {
         );
         problemDetail.setDetail(
                 this.messageSource.getMessage(
-                        "error.detail.already_exist",
+                        "error.details.already_exist",
                         null,
                         Locale.getDefault()
                 )

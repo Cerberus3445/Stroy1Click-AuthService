@@ -10,13 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.stroy1click.auth.dto.UserDto;
-import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.*;
 import ru.stroy1click.auth.service.AuthService;
 import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.util.ValidationErrorUtils;
-import ru.stroy1click.auth.validator.UserCreateValidator;
 
 import java.util.Locale;
 
@@ -31,14 +29,11 @@ public class AuthController {
 
     private final RefreshTokenService refreshTokenService;
 
-    private final UserCreateValidator createValidator;
-
     private final MessageSource messageSource;
 
     @PostMapping("/registration")
     @Operation(summary = "Зарегистрировать пользователя")
     public ResponseEntity<String> registration(@RequestBody @Valid UserDto userDto, BindingResult bindingResult) {
-        this.createValidator.validate(userDto);
         if(bindingResult.hasFieldErrors()) throw new ValidationException(
                 ValidationErrorUtils.collectErrorsToString(bindingResult.getFieldErrors())
         );
@@ -61,7 +56,7 @@ public class AuthController {
                 ValidationErrorUtils.collectErrorsToString(bindingResult.getFieldErrors())
         );
 
-        User user = this.authService.login(authRequest);
+        UserDto user = this.authService.login(authRequest);
         return JwtResponse
                 .builder()
                 .accessToken(this.authService.generateToken(user.getEmail()))
@@ -82,7 +77,7 @@ public class AuthController {
         );
     }
 
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     @Operation(summary = "Выйти из сеанса(удаление только 1 refresh token.)")
     public ResponseEntity<String> logout(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest,
                                          BindingResult bindingResult){

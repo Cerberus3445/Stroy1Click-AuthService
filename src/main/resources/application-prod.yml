@@ -25,9 +25,17 @@ spring:
 server:
   port: 9090
 
-logging:
-  file:
-    path: logs
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
 
 url:
   service:

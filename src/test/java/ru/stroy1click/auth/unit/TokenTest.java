@@ -7,16 +7,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.MessageSource;
+import ru.stroy1click.auth.client.UserClient;
 import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.exception.NotFoundException;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.entity.RefreshToken;
 import ru.stroy1click.auth.model.RefreshTokenRequest;
-import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.repository.RefreshTokenRepository;
 import ru.stroy1click.auth.service.JwtService;
-import ru.stroy1click.auth.service.UserService;
 import ru.stroy1click.auth.service.impl.RefreshTokenServiceImpl;
 
 import java.time.Instant;
@@ -32,7 +31,7 @@ class TokenTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private UserService userService;
+    private UserClient userClient;
 
     @Mock
     private MessageSource messageSource;
@@ -46,7 +45,6 @@ class TokenTest {
     @InjectMocks
     private RefreshTokenServiceImpl refreshTokenService;
 
-    private User user;
     private UserDto userDto;
     private RefreshToken refreshToken;
     private RefreshTokenRequest refreshTokenRequest;
@@ -59,16 +57,13 @@ class TokenTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        
-        this.user = new User();
-        this.user.setId(USER_ID);
-        this.user.setEmail(TEST_EMAIL);
 
         this.userDto = new UserDto();
+        this.userDto.setId(USER_ID);
         this.userDto.setEmail(TEST_EMAIL);
 
         this.refreshToken = new RefreshToken();
-        this.refreshToken.setUser(this.user);
+        this.refreshToken.setUserId(USER_ID);
         this.refreshToken.setToken(TEST_TOKEN);
         this.refreshToken.setExpiryDate(Instant.now().plusSeconds(600000));
 
@@ -79,11 +74,11 @@ class TokenTest {
     @Test
     public void createRefreshToken_ShouldCreateToken_WhenUserExistsAndSessionsLessThanSix() {
         // Given
-        when(this.userService.getByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
-        when(this.refreshTokenRepository.countByUser_Id(USER_ID)).thenReturn(5);
+        when(this.userClient.getByEmail(TEST_EMAIL)).thenReturn(this.userDto);
+        when(this.refreshTokenRepository.countByUserId(USER_ID)).thenReturn(5);
         
         RefreshToken savedToken = RefreshToken.builder()
-                .user(user)
+                .userId(USER_ID)
                 .token(GENERATED_TOKEN)
                 .expiryDate(Instant.now().plusSeconds(600000))
                 .build();
@@ -95,9 +90,9 @@ class TokenTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(user, result.getUser());
-        verify(this.userService).getByEmail(TEST_EMAIL);
-        verify(this.refreshTokenRepository).countByUser_Id(USER_ID);
+        assertEquals(this.userDto.getId(), result.getUserId());
+        verify(this.userClient).getByEmail(TEST_EMAIL);
+        verify(this.refreshTokenRepository).countByUserId(USER_ID);
         verify(this.refreshTokenRepository).save(any(RefreshToken.class));
     }
 
@@ -105,25 +100,23 @@ class TokenTest {
     public void createRefreshToken_ShouldThrowNotFoundException_WhenUserNotExists() {
         // Given
         String email = "nonexistent@example.com";
-        when(this.userService.getByEmail(email)).thenReturn(Optional.empty());
+        when(this.userClient.getByEmail(email)).thenThrow(new NotFoundException("User not found"));
 
         // When & Then
         assertThrows(NotFoundException.class, () -> this.refreshTokenService.createRefreshToken(email));
-        verify(this.userService).getByEmail(email);
+        verify(this.userClient).getByEmail(email);
     }
 
     @Test
     public void createRefreshToken_ShouldThrowValidationException_WhenUserHasMoreThanSixSessions() {
         // Given
-        when(this.userService.getByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
-        when(this.refreshTokenRepository.countByUser_Id(USER_ID)).thenReturn(7);
-        when(this.messageSource.getMessage("error.refresh.token.max_session", null, Locale.getDefault()))
-                .thenReturn("Maximum sessions exceeded");
+        when(this.userClient.getByEmail(TEST_EMAIL)).thenReturn(this.userDto);
+        when(this.refreshTokenRepository.countByUserId(USER_ID)).thenReturn(7);
 
         // When & Then
         assertThrows(ValidationException.class, () -> this.refreshTokenService.createRefreshToken(TEST_EMAIL));
-        verify(this.userService).getByEmail(TEST_EMAIL);
-        verify(this.refreshTokenRepository).countByUser_Id(USER_ID);
+        verify(this.userClient).getByEmail(TEST_EMAIL);
+        verify(this.refreshTokenRepository).countByUserId(USER_ID);
     }
 
     @Test
@@ -169,7 +162,7 @@ class TokenTest {
         this.refreshTokenService.deleteAll(USER_ID);
 
         // Then
-        verify(this.refreshTokenRepository).deleteAllByUser_Id(USER_ID);
+        verify(this.refreshTokenRepository).deleteAllByUserId(USER_ID);
     }
 
     @Test
@@ -207,18 +200,17 @@ class TokenTest {
     public void refreshAccessToken_ShouldReturnJwtResponse_WhenTokenExistsAndNotExpired() {
         // Given
         when(this.refreshTokenRepository.findFirstByToken(TEST_TOKEN)).thenReturn(Optional.of(refreshToken));
-        when(this.modelMapper.map(refreshToken.getUser(), UserDto.class)).thenReturn(userDto);
         when(this.jwtService.generateToken(userDto)).thenReturn(NEW_ACCESS_TOKEN);
+        when(this.userClient.get(refreshToken.getUserId())).thenReturn(this.userDto);
 
         // When
-        JwtResponse result = this.refreshTokenService.refreshAccessToken(refreshTokenRequest);
+        JwtResponse result = this.refreshTokenService.refreshAccessToken(this.refreshTokenRequest);
 
         // Then
         assertNotNull(result);
         assertEquals(NEW_ACCESS_TOKEN, result.getAccessToken());
         assertEquals(TEST_TOKEN, result.getRefreshToken());
         verify(this.refreshTokenRepository).findFirstByToken(TEST_TOKEN);
-        verify(this.modelMapper).map(refreshToken.getUser(), UserDto.class);
         verify(this.jwtService).generateToken(userDto);
     }
 
@@ -242,7 +234,7 @@ class TokenTest {
         // Given
         String expiredToken = "expired-token";
         RefreshToken expiredRefreshToken = new RefreshToken();
-        expiredRefreshToken.setUser(user);
+        expiredRefreshToken.setUserId(USER_ID);
         expiredRefreshToken.setToken(expiredToken);
         expiredRefreshToken.setExpiryDate(Instant.now().minusSeconds(600000)); // Expired
         

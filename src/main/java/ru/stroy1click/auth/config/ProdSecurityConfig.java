@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,12 +22,13 @@ import ru.stroy1click.auth.filter.JwtAuthFilter;
 
 import java.util.Collections;
 
+@Profile("prod")
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class ProdSecurityConfig {
 
-    @Value("${url.service.web}")
+    @Value("${url.web}")
     private String uri;
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -43,7 +45,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(this.jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

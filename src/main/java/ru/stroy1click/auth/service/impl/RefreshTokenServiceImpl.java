@@ -2,21 +2,19 @@ package ru.stroy1click.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.stroy1click.auth.client.UserClient;
 import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.exception.NotFoundException;
 import ru.stroy1click.auth.exception.ValidationException;
 import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.entity.RefreshToken;
 import ru.stroy1click.auth.model.RefreshTokenRequest;
-import ru.stroy1click.auth.entity.User;
 import ru.stroy1click.auth.repository.RefreshTokenRepository;
 import ru.stroy1click.auth.service.JwtService;
 import ru.stroy1click.auth.service.RefreshTokenService;
-import ru.stroy1click.auth.service.UserService;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -32,11 +30,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    private final UserService userService;
+    private final UserClient userClient;
 
     private final MessageSource messageSource;
-
-    private final ModelMapper modelMapper;
 
     private final JwtService jwtService;
 
@@ -47,23 +43,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(String email) {
         log.info("createRefreshToken {}", email);
-        User user = this.userService.getByEmail(email)
-                .orElseThrow(
-                        () -> new NotFoundException(email)
-                );
+
+        UserDto userDto = this.userClient.getByEmail(email);
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .user(user)
+                .userId(userDto.getId())
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(600000))
                 .build();
 
-        if(this.refreshTokenRepository.countByUser_Id(user.getId()) <= 6){
+        if(this.refreshTokenRepository.countByUserId(userDto.getId()) <= 6){
             return this.refreshTokenRepository.save(refreshToken);
         } else {
             throw new ValidationException(
                     this.messageSource.getMessage(
-                            "error.refresh.token.max_session",
+                            "error.refresh_token.max_session",
                             null,
                             Locale.getDefault()
                     )
@@ -74,26 +68,33 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public Optional<RefreshToken> findByToken(String token) {
         log.info("findByToken {}", token);
+
         return this.refreshTokenRepository.findFirstByToken(token);
     }
 
     @Override
     public void delete(String token) {
         log.info("delete {}", token);
+
         this.refreshTokenRepository.deleteByToken(token);
     }
 
     @Override
     public void deleteAll(Long userId) {
         log.info("deleteAll for user with {} id", userId);
-        this.refreshTokenRepository.deleteAllByUser_Id(userId);
+
+        this.refreshTokenRepository.deleteAllByUserId(userId);
     }
 
     @Override
     public void extendTheExpirationDate(RefreshTokenRequest request) {
         RefreshToken refreshToken = this.refreshTokenRepository.findFirstByToken(request.getRefreshToken())
                         .orElseThrow(
-                                () -> new NotFoundException(request)
+                                () -> new NotFoundException(
+                                        this.messageSource.getMessage("",
+                                                new Object[]{request},
+                                                Locale.getDefault())
+                                )
                         );
         refreshToken.setExpiryDate(refreshToken.getExpiryDate()
                 .plus(Duration.ofDays(7)));
@@ -102,14 +103,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public JwtResponse refreshAccessToken(RefreshTokenRequest request) {
+        log.info("refreshAccessToken {}", request);
         RefreshToken refreshToken = this.refreshTokenRepository.findFirstByToken(request.getRefreshToken())
                 .orElseThrow(
-                        () -> new NotFoundException(request)
+                        () -> new NotFoundException(
+                                this.messageSource.getMessage(
+                                        "error.refresh_token.not_found",
+                                        new Object[]{request.getRefreshToken()},
+                                        Locale.getDefault()
+                                )
+                        )
                 );
 
         verifyExpiration(refreshToken);
 
-        UserDto userDto = this.modelMapper.map(refreshToken.getUser(), UserDto.class);
+        UserDto userDto = this.userClient.get(refreshToken.getUserId());
 
         return JwtResponse.builder()
                 .accessToken(this.jwtService.generateToken(userDto))
@@ -121,7 +129,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             throw new ValidationException(
                     this.messageSource.getMessage(
-                            "error.refresh.token.expired",
+                            "error.refresh_token.expired",
                             null,
                             Locale.getDefault()
                     )

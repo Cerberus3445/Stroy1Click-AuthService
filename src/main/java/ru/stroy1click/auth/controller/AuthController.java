@@ -57,6 +57,7 @@ public class AuthController {
         );
 
         UserDto user = this.authService.login(authRequest);
+
         return JwtResponse
                 .builder()
                 .accessToken(this.authService.generateToken(user.getEmail()))

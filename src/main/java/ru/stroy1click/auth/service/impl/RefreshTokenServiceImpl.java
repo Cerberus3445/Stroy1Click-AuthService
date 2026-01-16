@@ -44,15 +44,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken createRefreshToken(String email) {
         log.info("createRefreshToken {}", email);
 
-        UserDto userDto = this.userClient.getByEmail(email);
-
         RefreshToken refreshToken = RefreshToken.builder()
-                .userId(userDto.getId())
+                .userEmail(email)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(600000))
                 .build();
 
-        if(this.refreshTokenRepository.countByUserId(userDto.getId()) <= 6){
+        if(this.refreshTokenRepository.countByUserEmail(email) <= 6){
             return this.refreshTokenRepository.save(refreshToken);
         } else {
             throw new ValidationException(
@@ -80,10 +78,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public void deleteAll(Long userId) {
-        log.info("deleteAll for user with {} id", userId);
+    public void deleteAll(String email) {
+        log.info("deleteAll for user with {} id", email);
 
-        this.refreshTokenRepository.deleteAllByUserId(userId);
+        this.refreshTokenRepository.deleteAllByUserEmail(email);
     }
 
     @Override
@@ -117,7 +115,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         verifyExpiration(refreshToken);
 
-        UserDto userDto = this.userClient.get(refreshToken.getUserId());
+        UserDto userDto = this.userClient.getByEmail(refreshToken.getUserEmail());
 
         return JwtResponse.builder()
                 .accessToken(this.jwtService.generateToken(userDto))

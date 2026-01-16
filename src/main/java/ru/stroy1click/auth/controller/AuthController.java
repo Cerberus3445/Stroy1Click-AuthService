@@ -67,8 +67,9 @@ public class AuthController {
 
     @DeleteMapping("/logout-on-all-devices")
     @Operation(summary = "Выйти на всех устройствах.")
-    public ResponseEntity<String> logoutOnAllDevices(@RequestParam("userId") Long userId){
-        this.refreshTokenService.deleteAll(userId);
+    public ResponseEntity<String> logoutOnAllDevices(@RequestParam("email") String email){
+        this.refreshTokenService.deleteAll(email);
+
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
                         "info.auth.logout-on-all-devices.",

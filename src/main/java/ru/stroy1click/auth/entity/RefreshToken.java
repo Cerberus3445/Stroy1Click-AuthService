@@ -24,6 +24,6 @@ public class RefreshToken {
 
     private Instant expiryDate;
 
-    private Long userId;
+    private String userEmail;
 
 }

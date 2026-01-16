@@ -16,7 +16,7 @@ public interface RefreshTokenService {
 
     void delete(String token);
 
-    void deleteAll(Long userId);
+    void deleteAll(String email);
 
     void extendTheExpirationDate(RefreshTokenRequest request);
 

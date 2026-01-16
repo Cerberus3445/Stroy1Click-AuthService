@@ -26,23 +26,6 @@ public class UserClientImpl implements UserClient {
     }
 
     @Override
-    public UserDto get(Long id) {
-        log.info("get {}", id);
-        try {
-            return this.restClient.get()
-                    .uri("/{id}", id)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError,(request, response) -> {
-                        ValidationErrorUtils.validateStatus(response);
-                    })
-                    .body(UserDto.class);
-        } catch (ResourceAccessException e){
-            log.error("get error", e);
-            throw new ServiceUnavailableException();
-        }
-    }
-
-    @Override
     public UserDto getByEmail(String email) {
         log.info("getByEmail {}", email);
         try {

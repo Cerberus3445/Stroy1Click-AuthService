@@ -38,8 +38,7 @@ management:
       show-details: always
 
 url:
-  service:
-    web: http://localhost:3000
+  user: http://localhost:8080/api/v1/users
     
 jwt:
   secret: 5367566B5970337336762342342342341139792F4123F452811482B4D6251655468576D5A71347437

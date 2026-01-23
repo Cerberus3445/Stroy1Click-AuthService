@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.stroy1click.auth.client.UserClient;
@@ -19,7 +18,6 @@ import ru.stroy1click.auth.service.RefreshTokenService;
 import ru.stroy1click.auth.service.impl.AuthServiceImpl;
 
 import java.util.Locale;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -59,7 +57,7 @@ class AuthTest {
         MockitoAnnotations.openMocks(this);
 
         this.userDto = new UserDto();
-        this.userDto.setPassword("plainPassword");
+        this.userDto.setPassword(ENCODED_PASSWORD);
 
         this.authRequest = new AuthRequest();
         this.authRequest.setEmail(TEST_EMAIL);
@@ -70,20 +68,10 @@ class AuthTest {
     }
 
     @Test
-    public void createUser_ShouldEncodePasswordAndCreateUser_WhenCalled() {
-        // When
-        this.authService.createUser(userDto);
-
-        // Then
-        verify(this.passwordEncoder).encode("plainPassword");
-        verify(this.userClient).create(userDto);
-    }
-
-    @Test
     public void generateToken_ShouldGenerateToken_WhenUserExists() {
         // Given
         when(this.userClient.getByEmail(TEST_EMAIL)).thenReturn(userDto);
-        when(this.jwtService.generateToken(userDto)).thenReturn(GENERATED_TOKEN);
+        when(this.jwtService.generate(userDto)).thenReturn(GENERATED_TOKEN);
 
         // When
         String token = this.authService.generateToken(TEST_EMAIL);
@@ -91,7 +79,7 @@ class AuthTest {
         // Then
         assertEquals(GENERATED_TOKEN, token);
         verify(this.userClient).getByEmail(TEST_EMAIL);
-        verify(this.jwtService).generateToken(userDto);
+        verify(this.jwtService).generate(userDto);
     }
 
     @Test

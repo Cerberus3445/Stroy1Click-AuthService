@@ -176,7 +176,7 @@ class TokenTest {
     public void refreshAccessToken_ShouldReturnJwtResponse_WhenTokenExistsAndNotExpired() {
         // Given
         when(this.refreshTokenRepository.findFirstByToken("test-token")).thenReturn(Optional.of(refreshToken));
-        when(this.jwtService.generateToken(userDto)).thenReturn("new access token");
+        when(this.jwtService.generate(userDto)).thenReturn("new access token");
         when(this.userClient.getByEmail(refreshToken.getUserEmail())).thenReturn(this.userDto);
 
         // When
@@ -187,7 +187,7 @@ class TokenTest {
         assertEquals("new access token", result.getAccessToken());
         assertEquals("test-token", result.getRefreshToken());
         verify(this.refreshTokenRepository).findFirstByToken("test-token");
-        verify(this.jwtService).generateToken(userDto);
+        verify(this.jwtService).generate(userDto);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package ru.stroy1click.auth.service.impl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -23,12 +24,12 @@ public class JwtServiceImpl implements JwtService {
     public String SECRET;
 
     @Override
-    public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractEmail(String jwt) {
+        return extractClaim(jwt, Claims::getSubject);
     }
 
     @Override
-    public String generateToken(UserDto user) {
+    public String generate(UserDto user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole());
         claims.put("emailConfirmed", user.getEmailConfirmed());
@@ -36,9 +37,32 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> extractRole(String token) {
-        Map<String, Object> claims = extractAllClaims(token);
+    public Collection<? extends GrantedAuthority> extractRole(String jwt) {
+        Map<String, Object> claims = extractAllClaims(jwt);
         return Collections.singleton(new SimpleGrantedAuthority(claims.get("role").toString()));
+    }
+
+    @Override
+    public boolean validate(String jwt, String originalUri) {
+        try {
+            Collection<? extends GrantedAuthority> authorities = extractRole(jwt);
+
+            boolean hasRole = authorities.stream().anyMatch(auth -> {
+                String role = auth.getAuthority();
+                if(originalUri.startsWith("/api/v1/users") || originalUri.startsWith("/api/v1/orders")) {
+                    return role.equals("ROLE_USER") || role.equals("ROLE_ADMIN");
+                } else {
+                    return role.equals("ROLE_ADMIN");
+                }
+            });
+
+            Claims claims = extractAllClaims(jwt);
+            boolean notExpired = claims.getExpiration().after(new Date());
+
+            return hasRole && notExpired;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
     private String createToken(Map<String, Object> claims, UserDto user) {

@@ -43,16 +43,16 @@ public class UserClientImpl implements UserClient {
     }
 
     @Override
-    public void create(UserDto userDto) {
+    public UserDto create(UserDto userDto) {
         log.info("create {}", userDto);
         try {
-            this.restClient.post()
+            return this.restClient.post()
                     .body(userDto)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, response) -> {
                         ValidationErrorUtils.validateStatus(response);
                     })
-                    .body(String.class);
+                    .body(UserDto.class);
         } catch (ResourceAccessException e){
             log.error("create error", e);
             throw new ServiceUnavailableException();

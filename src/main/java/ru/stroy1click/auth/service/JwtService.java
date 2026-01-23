@@ -7,10 +7,11 @@ import java.util.Collection;
 
 public interface JwtService {
 
-    String extractEmail(String token);
+    String extractEmail(String jwt);
 
-    String generateToken(UserDto user);
+    String generate(UserDto user);
 
-    Collection<? extends GrantedAuthority> extractRole(String token);
+    Collection<? extends GrantedAuthority> extractRole(String jwt);
 
+    boolean validate(String jwt, String originalUri);
 }

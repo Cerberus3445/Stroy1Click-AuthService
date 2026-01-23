@@ -6,5 +6,5 @@ public interface UserClient {
 
     UserDto getByEmail(String email);
 
-    void create(UserDto userDto);
+    UserDto create(UserDto userDto);
 }

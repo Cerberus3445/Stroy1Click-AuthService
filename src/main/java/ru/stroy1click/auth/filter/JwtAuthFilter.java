@@ -33,7 +33,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 email = this.jwtService.extractEmail(token);
             } catch (JwtException e){ //Expired, InvalidSignature, etc exception
-                email = null;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
         }
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

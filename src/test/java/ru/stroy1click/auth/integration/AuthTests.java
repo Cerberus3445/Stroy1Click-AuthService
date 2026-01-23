@@ -2,15 +2,21 @@ package ru.stroy1click.auth.integration;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import ru.stroy1click.auth.client.UserClient;
 import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.model.AuthRequest;
 import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.model.Role;
+
+import static org.mockito.Mockito.when;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -18,6 +24,9 @@ class AuthTests {
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @MockitoBean
+    private UserClient userClient;
 
     @Test
     public void registration_ShouldRegisterUser_WhenValidData(){
@@ -29,6 +38,8 @@ class AuthTests {
                 .emailConfirmed(false)
                 .role(Role.ROLE_USER)
                 .build());
+
+        when(this.userClient.create(httpEntity.getBody())).thenReturn(new UserDto());
 
         ResponseEntity<String> responseEntity = this.testRestTemplate.exchange(
                 "/api/v1/auth/registration",
@@ -46,6 +57,8 @@ class AuthTests {
     @Test
     public void login_ShouldReturnTokens_WhenValidCredentials(){
         HttpEntity<AuthRequest> httpEntity = new HttpEntity<>(new AuthRequest("mike_thompson@gmail.com", "password123"));
+
+        when(this.userClient.getByEmail("mike_thompson@gmail.com")).thenReturn(new UserDto(1L,"Mike", "Thompson", "mike_thompson@gmail.com", "{noop}password123", true,Role.ROLE_USER));
 
         ResponseEntity<JwtResponse> responseEntity = this.testRestTemplate.exchange(
                 "/api/v1/auth/login",

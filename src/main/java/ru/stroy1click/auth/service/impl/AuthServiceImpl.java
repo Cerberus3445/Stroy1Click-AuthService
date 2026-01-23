@@ -39,10 +39,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String generateToken(String email) {
-        log.info("generateToken {}", email);
+        log.info("generate {}", email);
         UserDto userDto = this.userClient.getByEmail(email);
 
-        return this.jwtService.generateToken(userDto);
+        return this.jwtService.generate(userDto);
     }
 
     @Override

@@ -7,8 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import ru.stroy1click.auth.client.UserClient;
+import ru.stroy1click.auth.dto.UserDto;
 import ru.stroy1click.auth.model.JwtResponse;
 import ru.stroy1click.auth.model.RefreshTokenRequest;
+import ru.stroy1click.auth.model.Role;
+
+import static org.mockito.Mockito.when;
 
 @Import({TestcontainersConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -17,10 +23,15 @@ public class TokenTests {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    @MockitoBean
+    private UserClient userClient;
+
     @Test
     public void refreshAccessToken_ShouldReturnNewTokens_WhenValidRefreshToken() {
         String refreshToken = "ba9a4691-ff6d-45eb-857f-1e39079ebd60";
         HttpEntity<RefreshTokenRequest> httpEntity = new HttpEntity<>(new RefreshTokenRequest(refreshToken));
+
+        when(this.userClient.getByEmail("mike_thompson@gmail.com")).thenReturn(new UserDto(1L,"Mike", "Thompson", "mike_thompson@gmail.com", "{noop}password123", true, Role.ROLE_USER));
 
         ResponseEntity<JwtResponse> responseEntity = this.testRestTemplate.exchange(
                 "/api/v1/tokens/access",

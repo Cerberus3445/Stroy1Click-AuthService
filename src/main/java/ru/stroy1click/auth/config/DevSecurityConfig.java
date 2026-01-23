@@ -28,9 +28,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class DevSecurityConfig {
 
-    @Value("${url.web}")
-    private String uri;
-
     private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
@@ -42,7 +39,6 @@ public class DevSecurityConfig {
                                 "/actuator/health")
                         .permitAll()
                         .anyRequest().authenticated())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(this.jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -60,20 +56,4 @@ public class DevSecurityConfig {
             throw new UsernameNotFoundException("User not found");
         };
     }
-
-    @Bean //TODO
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList(uri));
-        configuration.setAllowedMethods(Collections.singletonList("*"));
-        configuration.setAllowedHeaders(Collections.singletonList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
-
 }

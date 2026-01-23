@@ -89,7 +89,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = this.refreshTokenRepository.findFirstByToken(request.getRefreshToken())
                         .orElseThrow(
                                 () -> new NotFoundException(
-                                        this.messageSource.getMessage("",
+                                        this.messageSource.getMessage("error.refresh_token.not_found",
                                                 new Object[]{request},
                                                 Locale.getDefault())
                                 )
@@ -118,7 +118,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         UserDto userDto = this.userClient.getByEmail(refreshToken.getUserEmail());
 
         return JwtResponse.builder()
-                .accessToken(this.jwtService.generateToken(userDto))
+                .accessToken(this.jwtService.generate(userDto))
                 .refreshToken(refreshToken.getToken())
                 .build();
     }

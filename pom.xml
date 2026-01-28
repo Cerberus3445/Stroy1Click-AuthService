@@ -167,16 +167,6 @@
             <artifactId>modelmapper</artifactId>
             <version>${modelmapper.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -226,7 +216,7 @@
                     <verbose>true</verbose>
                     <images>
                         <image>
-                            <name>${docker.image.prefix}/${docker.image.name}</name>
+                            <name>${docker.image.prefix}/${docker.image.name}-arm64</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                                 <assembly>
